@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
 
     discarded = False
+    skipped = False
 
     def __init__(self, site, source_path):
         self.site = site
@@ -98,6 +99,10 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
         """
 
         data = self.data()
+
+        if self.skipped:
+            return data
+
         context = self.context(data=data)
 
         # This is not very nice, but we already used the header context in the

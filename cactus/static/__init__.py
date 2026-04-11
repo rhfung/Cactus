@@ -18,6 +18,7 @@ class Static(StaticCompatibilityLayer, ResourceURLHelperMixin):
     """
 
     discarded = False
+    skipped = False
 
     def __init__(self, site, path, relative_to=None):
         """
@@ -121,6 +122,9 @@ class Static(StaticCompatibilityLayer, ResourceURLHelperMixin):
                 elif external.discarded():
                     self.discard()
                     break
+                elif external.skipped():
+                    self.skip()
+                    break
 
                 raise Exception("External {0} has an unknown status: {1}".format(external, external.status))
 
@@ -152,6 +156,9 @@ class Static(StaticCompatibilityLayer, ResourceURLHelperMixin):
 
     def discard(self):
         self.discarded = True  #TODO: Warn on usage of the static!
+
+    def skip(self):
+        self.skipped = True
 
     def build(self):
 
