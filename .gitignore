@@ -9,3 +9,5 @@ examples/blog/config.json
 .tox
 TestProject
 .eggs
+venv
+.venv

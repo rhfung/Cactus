@@ -26,32 +26,34 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
         self.source_path = source_path
 
         # The URL where this element should be linked in "base" pages
-        self.link_url = '/{0}'.format(self.source_path)
+        self.link_url = "/{0}".format(self.source_path)
 
         if self.site.prettify_urls:
             # The URL where this element should be linked in "built" pages
             if self.is_html():
                 if self.is_index():
-                    self.final_url = self.link_url.rsplit('index.html', 1)[0]
+                    self.final_url = self.link_url.rsplit("index.html", 1)[0]
                 else:
-                    self.final_url = '{0}/'.format(self.link_url.rsplit('.html', 1)[0])
+                    self.final_url = "{0}/".format(self.link_url.rsplit(".html", 1)[0])
             else:
                 self.final_url = self.link_url
 
             # The path where this element should be built to
-            if not self.is_html() or self.source_path.endswith('index.html'):
+            if not self.is_html() or self.source_path.endswith("index.html"):
                 self.build_path = self.source_path
             else:
-                self.build_path = '{0}/{1}'.format(self.source_path.rsplit('.html', 1)[0], 'index.html')
+                self.build_path = "{0}/{1}".format(
+                    self.source_path.rsplit(".html", 1)[0], "index.html"
+                )
         else:
             self.final_url = self.link_url
             self.build_path = self.source_path
 
     def is_html(self):
-        return urllib.parse.urlparse(self.source_path).path.endswith('.html')
+        return urllib.parse.urlparse(self.source_path).path.endswith(".html")
 
     def is_index(self):
-        return urllib.parse.urlparse(self.source_path).path.endswith('index.html')
+        return urllib.parse.urlparse(self.source_path).path.endswith("index.html")
 
     @property
     def absolute_final_url(self):
@@ -62,19 +64,23 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
 
     @property
     def full_source_path(self):
-        return os.path.join(self.site.path, 'pages', self.source_path)
+        return os.path.join(self.site.path, "pages", self.source_path)
 
     @property
     def full_build_path(self):
         return os.path.join(self.site.build_path, self.build_path)
 
     def data(self):
-        with io.FileIO(self.full_source_path, 'r') as f:
+        with io.FileIO(self.full_source_path, "r") as f:
             try:
-                return f.read().decode('utf-8')
+                return f.read().decode("utf-8")
             except:
-                logger.warning("Template engine could not process page: %s", self.path, exc_info=True)
-                return u""
+                logger.warning(
+                    "Template engine could not process page: %s",
+                    self.path,
+                    exc_info=True,
+                )
+                return ""
 
     def context(self, data=None, extra=None):
         """
@@ -83,7 +89,9 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
         if extra is None:
             extra = {}
 
-        context = {'__CACTUS_CURRENT_PAGE__': self,}
+        context = {
+            "__CACTUS_CURRENT_PAGE__": self,
+        }
 
         page_context, data = self.parse_context(data or self.data())
 
@@ -97,11 +105,7 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
         """
         Takes the template data with context and renders it to the final output file.
         """
-
         data = self.data()
-
-        if self.skipped:
-            return data
 
         context = self.context(data=data)
 
@@ -110,7 +114,11 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
         page_context, data = self.parse_context(data)
 
         context, data = self.site.plugin_manager.preBuildPage(
-            self.site, self, context, data)
+            self.site, self, context, data
+        )
+
+        if self.skipped:
+            return data
 
         return Template(data).render(context)
 
@@ -118,8 +126,10 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
         """
         Save the rendered output to the output file.
         """
-        logger.debug('Building {0} --> {1}'.format(self.source_path, self.final_url))  #TODO: Fix inconsistency w/ static
-        data = self.render()  #TODO: This calls preBuild indirectly. Not great.
+        logger.debug(
+            "Building {0} --> {1}".format(self.source_path, self.final_url)
+        )  # TODO: Fix inconsistency w/ static
+        data = self.render()  # TODO: This calls preBuild indirectly. Not great.
 
         if not self.discarded:
 
@@ -129,12 +139,12 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
             except OSError:
                 pass
 
-            with io.FileIO(self.full_build_path, 'w') as f:
-                f.write(data.encode('utf-8'))
+            with io.FileIO(self.full_build_path, "w") as f:
+                f.write(data.encode("utf-8"))
 
             self.site.plugin_manager.postBuildPage(self)
 
-    def parse_context(self, data, splitChar=':'):
+    def parse_context(self, data, splitChar=":"):
         """
         Values like
 
@@ -150,7 +160,7 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
 
         lines = data.splitlines()
         if not lines:
-            return {}, ''
+            return {}, ""
 
         values = {}
         parsing_yaml = False
@@ -174,7 +184,7 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
 
         # Parse as YAML
         if parsing_yaml:
-            [raw_yaml, template] = data.split('...', 1)
+            [raw_yaml, template] = data.split("...", 1)
             try:
                 return yaml.load(raw_yaml), template
             except Exception as e:
@@ -183,7 +193,7 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
 
         # Parse using the old parser
         else:
-            return values, '\n'.join(lines[i:])
+            return values, "\n".join(lines[i:])
 
     def __repr__(self):
-        return '<Page: {0}>'.format(self.source_path)
+        return "<Page: {0}>".format(self.source_path)

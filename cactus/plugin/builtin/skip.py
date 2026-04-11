@@ -1,21 +1,22 @@
-#coding:utf-8
+# coding:utf-8
 import fnmatch
+
 
 class SkipPatternsPlugin(object):
     """
     Define configurable ignore patterns for static files and pages
     """
+
     def preBuild(self, site):
         """
         Load the ignore patterns from the site config
         """
-        self.skip_patterns = site.config.get('skip', [])
+        self.skip_patterns = site.config.get("skip", [])
 
     def preBuildPage(self, page, context, data):
         if not self.accept_path(page.source_path):
             page.skipped = True
         return context, data
-
 
     def preBuildStatic(self, static):
         if not self.accept_path(static.path):
