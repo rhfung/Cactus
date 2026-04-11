@@ -9,7 +9,7 @@ class IgnorePatternsPlugin(object):
         """
         Load the ignore patterns from the site config
         """
-        self.ignore_patterns = site.config.get('ignore', [])
+        self.ignore_patterns = site.config.get('ignore', [])\n        self.bypass_jinja_patterns = site.config.get('bypass_jinja', [])
 
     def preBuildPage(self, page, context, data):
         if not self.accept_path(page.source_path):
@@ -26,7 +26,7 @@ class IgnorePatternsPlugin(object):
         :param path: A path to be tested
         :returns: Whether this path can be includes in the build
         """
-        for pattern in self.ignore_patterns:
+        for pattern in self.ignore_patterns + self.bypass_jinja_patterns:
             if fnmatch.fnmatch(path, pattern):
                 return False
         return True
