@@ -291,6 +291,33 @@ Cactus will auto generate a `robots.txt` and `sitemap.xml` file for you based on
 This will help bots to index your pages for Google and Bing for example.
 
 
+### Configuration
+
+Cactus reads configuration from `config.json` in your project root. Available settings:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `site-url` | string | The base URL of your site (e.g., `http://yoursite.com`). Required for sitemaps with absolute paths. |
+| `prettify` | boolean | When `true`, generates `/my-page/` instead of `/my-page.html`. |
+| `compress` | array | File extensions to compress during deployment. Default: `["html", "css", "js", "txt", "xml"]` |
+| `fingerprint` | array | File extensions to fingerprint (append hash for cache busting). Example: `["js", "css"]` |
+| `optimize` | array | File extensions to optimize/minify. Example: `["js", "css"]` |
+| `cache-duration` | string | Cache-Control header value for non-fingerprinted files (e.g., `public, max-age=31536000`). |
+| `context` | object | Custom global context variables available in all templates. |
+| `blog` | object | Blog plugin configuration. Sub-keys: `path` (default: `"blog"`), `author` (default: `"Unknown"`), `date-format` (default: `"%d-%m-%Y"`) |
+| `skip` | array | Files/folders to skip during processing. |
+| `ignore` | array | Files/folders to ignore (not copied to build). |
+| `locale` | string | Default locale for internationalization. |
+| `aws-bucket-name` | string | S3 bucket name for deployment. |
+| `aws-bucket-website` | string | S3 website endpoint (optional, defaults to bucket website endpoint). |
+| `aws-bucket-region` | string | S3 region (default: `"us-east-1"`). |
+| `aws-access-key` | string | Amazon AWS access key ID. |
+| `aws-secret-access-key` | string | Amazon AWS secret access key (stored securely in keychain after first deploy). |
+| `provider` | string | Deployment provider (default: `"aws"`). |
+
+Configuration is stored in `config.json` and can be edited manually or via the CLI. Secrets like AWS keys are stored securely in your system's keychain after the first deployment.
+
+
 Python Versions
 ---------------
 
