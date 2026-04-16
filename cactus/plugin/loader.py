@@ -1,7 +1,8 @@
-#coding:utf-8
+# coding:utf-8
 import os
 import sys
 import imp
+import ast
 import logging
 
 from cactus.plugin import defaults
@@ -21,7 +22,7 @@ class BasePluginsLoader(object):
         :returns: An initialized plugin with all default methods set.
         """
         # Load default attributes
-        for attr in defaults.DEFAULTS + ['ORDER']:
+        for attr in defaults.DEFAULTS + ["ORDER"]:
             if not hasattr(plugin, attr):
                 setattr(plugin, attr, getattr(defaults, attr))
 
@@ -39,6 +40,7 @@ class ObjectsPluginLoader(BasePluginsLoader):
     """
     Loads the plugins objects passed to this loader.
     """
+
     def __init__(self, plugins):
         """
         :param plugins: The list of plugins this loader should load.
@@ -84,7 +86,6 @@ class CustomPluginsLoader(BasePluginsLoader):
                     self._initialize_plugin(custom_plugin)
                     plugins.append(custom_plugin)
 
-
         return plugins
 
     def _is_plugin_path(self, plugin_path):
@@ -92,10 +93,10 @@ class CustomPluginsLoader(BasePluginsLoader):
         :param plugin_path: A path where to look for a plugin.
         :returns: Whether this path looks like an enabled plugin.
         """
-        if not plugin_path.endswith('.py'):
+        if not plugin_path.endswith(".py"):
             return False
 
-        if 'disabled' in plugin_path:
+        if "disabled" in plugin_path:
             return False
 
         return True
@@ -105,12 +106,25 @@ class CustomPluginsLoader(BasePluginsLoader):
         :param plugin_path: A path to load as a plugin.
         :returns: A plugin module.
         """
-        module_name = "plugin_{0}".format(os.path.splitext(os.path.basename(plugin_path))[0])
+        module_name = "plugin_{0}".format(
+            os.path.splitext(os.path.basename(plugin_path))[0]
+        )
+
+        try:
+            with open(plugin_path) as f:
+                source = f.read()
+            ast.parse(source)
+        except SyntaxError as e:
+            logger.warning("Plugin %s has invalid syntax: %s" % (plugin_path, e))
+            return None
+        except Exception as e:
+            logger.warning("Could not load plugin at path %s: %s" % (plugin_path, e))
+            return None
 
         try:
             return imp.load_source(module_name, plugin_path)
         except Exception as e:
-            logger.warning('Could not load plugin at path %s: %s' % (plugin_path, e))
+            logger.warning("Could not load plugin at path %s: %s" % (plugin_path, e))
             return None
 
             # sys.exit()
